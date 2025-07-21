@@ -44,6 +44,8 @@ parser.add_argument("to_dir", nargs=1, type=str,
                     help="paths to directory of files where to hardlink")
 parser.add_argument("new_name", nargs=1, type=str,
                     help="new name of files with seasons and episodes")
+parser.add_argument("--regex", "-r", nargs=1, type=str, default='s(\\d+)e(\\d+)',
+                    help="write regex to recognize season and episode(order cannot be changed) with (\\d+)")
 parser.add_argument("--test", "-t" , help="if turned on, just outputs result path for each file", action='store_true')
 
 args = parser.parse_args().__dict__
@@ -51,14 +53,16 @@ from_dir: str = args.pop("from_dir")[0]
 to_dir: str = args.pop("to_dir")[0]
 new_name: str = args.pop("new_name")[0]
 is_test: bool = args.pop("test")
+regex = args["regex"][0] if type(args["regex"]) == list else args["regex"]
 
 is_any_file: bool = False
 for video_file in os.listdir(from_dir):
     # Extract season/episode info
-    is_any_file = True
-    match = re.search(r's(\d+)e(\d+)', video_file)
+    match = re.search(re.compile(regex), video_file)
     if not match:
         continue
+
+    is_any_file = True
         
     season, episode = match.groups()
     
